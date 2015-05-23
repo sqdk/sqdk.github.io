@@ -3,10 +3,10 @@
   <channel>
     <title></title>
     <description>Harmony is free responsive jekyll theme.</description>
-    <link>http://127.0.0.1:8124/harmony/</link>
-    <atom:link href="http://127.0.0.1:8124/harmony/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sat, 23 May 2015 16:54:01 +0000</pubDate>
-    <lastBuildDate>Sat, 23 May 2015 16:54:01 +0000</lastBuildDate>
+    <link>http://127.0.0.1:8124/</link>
+    <atom:link href="http://127.0.0.1:8124/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Sat, 23 May 2015 16:59:35 +0000</pubDate>
+    <lastBuildDate>Sat, 23 May 2015 16:59:35 +0000</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -69,8 +69,8 @@
 &lt;p&gt;Want me to suggest something? Please &lt;a href=&quot;https://github.com/web-create/harmony/issues/new&quot;&gt;Send me a request&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Tue, 19 Aug 2014 23:56:45 +0000</pubDate>
-        <link>http://127.0.0.1:8124/harmony/sample-post</link>
-        <guid isPermaLink="true">http://127.0.0.1:8124/harmony/sample-post</guid>
+        <link>http://127.0.0.1:8124/sample-post</link>
+        <guid isPermaLink="true">http://127.0.0.1:8124/sample-post</guid>
         
         
         <category>blog</category>
@@ -90,8 +90,8 @@
 
 </description>
         <pubDate>Mon, 28 Jul 2014 22:48:45 +0000</pubDate>
-        <link>http://127.0.0.1:8124/harmony/blog/jekyll/2014/07/28/welcome-to-jekyll/</link>
-        <guid isPermaLink="true">http://127.0.0.1:8124/harmony/blog/jekyll/2014/07/28/welcome-to-jekyll/</guid>
+        <link>http://127.0.0.1:8124/blog/jekyll/2014/07/28/welcome-to-jekyll/</link>
+        <guid isPermaLink="true">http://127.0.0.1:8124/blog/jekyll/2014/07/28/welcome-to-jekyll/</guid>
         
         
         <category>blog</category>
