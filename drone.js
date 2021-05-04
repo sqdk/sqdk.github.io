@@ -25,8 +25,8 @@ export class Drone {
         });
         this.body.addShape(frameShape);
         //this.body.angularVelocity.set(1, 1, 0)
-        //this.body.angularDamping = 0.01;
-        //this.body.linearDamping = 0.01
+        this.body.angularDamping = 0.01;
+        this.body.linearDamping = 0.01;
         world.addBody(this.body);
         // For some reason, it seems that cannon and three uses different conventions for boxes.
         // If i don't multiply the y axis by 2, the threejs box only covers half of the cannon body
@@ -98,7 +98,6 @@ export class Drone {
             me.position.copy(pos);
             me.quaternion.copy(this.droneFrame.quaternion);
             this.propellerThrustMeshes[i].position.copy(pos);
-            this.propellerThrustMeshes[i].position.y;
             this.propellerThrustMeshes[i].quaternion.copy(this.droneFrame.quaternion);
             this.propellerThrustMeshes[i].scale.copy(new THREE.Vector3(0.1, this.propellerThrust[i], 0.1));
         });
@@ -113,10 +112,21 @@ export class Drone {
             this.body.applyLocalForce(new CANNON.Vec3(0, clamp(thrustInNewtons, this.minThrust, this.maxThrust), 0), new CANNON.Vec3(p.x, p.y, p.z));
             // Apply a sideways force that simulates gyroscopic effects of the propellers and parts of the motors
             // This force allows us to turn sideways
-            const sidewaysMultiplier = 0.10;
+            const sidewaysMultiplier = 0.2;
             const sidewaysForce = clamp(thrustInNewtons, this.minThrust * sidewaysMultiplier, this.maxThrust * sidewaysMultiplier);
-            const force = i % 2 === 0 ? sidewaysForce : -sidewaysForce;
-            const vector = new CANNON.Vec3(force, 0, 0);
+            let vector;
+            if (i === 0) {
+                vector = new CANNON.Vec3(sidewaysForce, 0, 0);
+            }
+            else if (i === 1) {
+                vector = new CANNON.Vec3(-sidewaysForce, 0, 0);
+            }
+            else if (i === 2) {
+                vector = new CANNON.Vec3(-sidewaysForce, 0, 0);
+            }
+            else if (i === 3) {
+                vector = new CANNON.Vec3(sidewaysForce, 0, 0);
+            }
             this.body.applyLocalForce(vector, new CANNON.Vec3(p.x, p.y, p.z));
         });
     }

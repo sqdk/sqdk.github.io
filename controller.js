@@ -1,38 +1,53 @@
 import { clamp } from "./utils.js";
 export class DronePIDController {
-    constructor(propellerConfiguration, AltitudeProportional, AltitudeIntegral, AltitudeDerivative, HorizontalTiltProportional, HorizontalTiltIntegral, HorizontalTiltDerivative, deltaT) {
+    constructor(propellerConfiguration, AltitudeProportional, AltitudeIntegral, AltitudeDerivative, RollControllerProportional, RollControllerIntegral, RollControllerDerivative, YawControllerProportional, YawControllerIntegral, YawControllerDerivative, deltaT) {
         this.propellerConfiguration = propellerConfiguration;
         this.AltitudeProportional = AltitudeProportional;
         this.AltitudeIntegral = AltitudeIntegral;
         this.AltitudeDerivative = AltitudeDerivative;
-        this.HorizontalTiltProportional = HorizontalTiltProportional;
-        this.HorizontalTiltIntegral = HorizontalTiltIntegral;
-        this.HorizontalTiltDerivative = HorizontalTiltDerivative;
+        this.RollControllerProportional = RollControllerProportional;
+        this.RollControllerIntegral = RollControllerIntegral;
+        this.RollControllerDerivative = RollControllerDerivative;
+        this.YawControllerProportional = YawControllerProportional;
+        this.YawControllerIntegral = YawControllerIntegral;
+        this.YawControllerDerivative = YawControllerDerivative;
         this.deltaT = deltaT;
         this.Step = (position, velocity, rotation, angularVelocity) => {
-            const deltaAltitude = position.y;
-            const altitudeCorrection = clamp(this.AltitudeController.update(deltaAltitude), 0, 100);
+            const altitudeCorrection = clamp(this.AltitudeController.update(position.y), 0, 100);
+            const rollCorrection = clamp(this.RollController.update(rotation.z), -50, 50);
+            const pitchCorrection = clamp(this.PitchController.update(rotation.x), -50, 50);
+            const yawCorrection = clamp(this.YawController.update(rotation.y), -50, 50);
             const altDisplay = document.getElementById("current-altitude");
-            altDisplay.innerHTML = `${position.y - this.AltitudeController.getTarget()} ; ${position.y} ; ${altitudeCorrection}`;
-            // FL, FR, BL, BR
-            return [
-                altitudeCorrection,
-                altitudeCorrection,
-                altitudeCorrection,
-                altitudeCorrection
+            altDisplay.innerHTML = `Target: ${this.AltitudeController.getTarget()} Distance from target: ${(position.y - this.AltitudeController.getTarget()).toFixed(2)} ; Altitude: ${position.y.toFixed(2)} ; Thrust: ${altitudeCorrection.toFixed(2)}`;
+            const rollDisplay = document.getElementById("current-roll");
+            rollDisplay.innerHTML = `Target: ${this.RollController.getTarget()} Distance from target: ${(rotation.z - this.RollController.getTarget()).toFixed(2)} ; Roll: ${rotation.z.toFixed(2)} ; Thrust: ${rollCorrection}`;
+            const pitchDisplay = document.getElementById("current-pitch");
+            pitchDisplay.innerHTML = `Target: ${this.PitchController.getTarget()} Distance from target: ${(rotation.x - this.PitchController.getTarget()).toFixed(2)} ; Pitch: ${rotation.x.toFixed(2)} ; Thrust: ${pitchCorrection}`;
+            const yawDisplay = document.getElementById("current-yaw");
+            yawDisplay.innerHTML = `Target: ${this.YawController.getTarget()} Distance from target: ${(rotation.y - this.YawController.getTarget()).toFixed(2)} ; Yaw: ${rotation.y.toFixed(2)} ; Thrust: ${yawCorrection}`;
+            // FL, FR, BR, BL
+            const thrustMap = [
+                altitudeCorrection - rollCorrection + pitchCorrection - yawCorrection,
+                altitudeCorrection + rollCorrection + pitchCorrection + yawCorrection,
+                altitudeCorrection + rollCorrection - pitchCorrection - yawCorrection,
+                altitudeCorrection - rollCorrection - pitchCorrection + yawCorrection
             ];
+            return thrustMap;
         };
         this.SetParameters = (options) => {
             this.AltitudeController.setTarget(options.altitude);
-            this.ForwardTiltController.setTarget(options.forwardSpeed / 100);
-            this.SidewaysTiltController.setTarget(options.sidewaysSpeed);
+            this.RollController.setTarget(options.roll);
+            this.PitchController.setTarget(options.pitch);
+            this.YawController.setTarget(options.yaw);
         };
         this.AltitudeController = new PIDController(this.AltitudeProportional, this.AltitudeIntegral, this.AltitudeDerivative, this.deltaT, 100);
-        this.ForwardTiltController = new PIDController(this.HorizontalTiltProportional, this.HorizontalTiltIntegral, this.HorizontalTiltDerivative, this.deltaT, 100);
-        this.SidewaysTiltController = new PIDController(this.HorizontalTiltProportional, this.HorizontalTiltIntegral, this.HorizontalTiltDerivative, this.deltaT, 100);
+        this.RollController = new PIDController(this.RollControllerProportional, this.RollControllerIntegral, this.RollControllerDerivative, this.deltaT, 100);
+        this.PitchController = new PIDController(this.RollControllerProportional, this.RollControllerIntegral, this.RollControllerDerivative, this.deltaT, 100);
+        this.YawController = new PIDController(this.YawControllerProportional, this.YawControllerIntegral, this.YawControllerDerivative, this.deltaT, 100);
         this.AltitudeController.setTarget(0);
-        this.ForwardTiltController.setTarget(0);
-        this.SidewaysTiltController.setTarget(0);
+        this.RollController.setTarget(0);
+        this.PitchController.setTarget(0);
+        this.YawController.setTarget(0);
     }
 }
 export var PropellerConfiguration;
