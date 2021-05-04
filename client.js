@@ -7,9 +7,15 @@ const animate = (renderer, scene, camera, world, drones) => {
     const animator = () => {
         requestAnimationFrame(animator);
         updatePhysics(world, drones);
-        camera.position.x = drones[0].body.position.x;
-        camera.position.y = drones[0].body.position.y + .5;
-        camera.position.z = drones[0].body.position.z + 2;
+        camera.position.x = 0;
+        camera.position.y = 0.5;
+        camera.position.z = 2;
+        camera.position.applyQuaternion((new THREE.Quaternion()).copy(drones[0].body.quaternion));
+        camera.quaternion.x = 0; //drones[0].body.quaternion.x
+        camera.quaternion.y = drones[0].body.quaternion.y;
+        camera.quaternion.z = 0; //drones[0].body.quaternion.z
+        camera.quaternion.w = drones[0].body.quaternion.w;
+        camera.position.add(drones[0].body.position);
         render(renderer, scene, camera);
     };
     animator();
@@ -42,9 +48,9 @@ function initThree() {
     return [scene, camera, renderer];
 }
 function addWorldPlane(world, scene) {
-    const plane = new CANNON.Vec3(50, 1, 50);
-    const shape = new CANNON.Box(plane);
-    const rotation = new CANNON.Quaternion(0, 0, 1, 0);
+    const coords = new CANNON.Vec3(25, 1, 25);
+    const shape = new CANNON.Box(coords);
+    const rotation = new CANNON.Quaternion(0, 0, 0, 0);
     const position = new CANNON.Vec3(0, 0, 0);
     const body = new CANNON.Body({
         mass: 0,
@@ -53,7 +59,7 @@ function addWorldPlane(world, scene) {
     });
     body.addShape(shape);
     world.addBody(body);
-    const geometry = new THREE.BoxGeometry(plane.x, plane.y, plane.z);
+    const geometry = new THREE.BoxGeometry(coords.x, coords.y, coords.z, 20, 2);
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframeLinewidth: 0.5, wireframe: true });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.quaternion.copy(rotation);
@@ -63,9 +69,8 @@ function addWorldPlane(world, scene) {
     return [mesh, body];
 }
 function addDrone(world, scene, initialPosition) {
-    const dynamicController = new DronePIDController(PropellerConfiguration.QuadCross, 8, 1, 12, 1, 1, 8, 1 / 60);
-    const stableController = new DronePIDController(PropellerConfiguration.QuadCross, 8, 8, 24, 1, 1, 8, 1 / 60);
-    const drone = new Drone(world, scene, initialPosition, [100, 100, 100, 100], 25, 0, dynamicController, PropellerConfiguration.QuadCross);
+    const stableController = new DronePIDController(PropellerConfiguration.QuadCross, 2, 0.5, 3, 1, 0, 3, 2, 0, 3, 1 / 60);
+    const drone = new Drone(world, scene, initialPosition, [100, 100, 100, 100], 25, 0, stableController, PropellerConfiguration.QuadCross);
     return drone;
 }
 function updatePhysics(world, drones) {
@@ -93,14 +98,20 @@ const world = initCannon();
 const droneBody = addDrone(world, scene, new CANNON.Vec3(0, 1, 0));
 const worldPlane = addWorldPlane(world, scene);
 const setParameters = () => {
-    console.log({ altitude: altitudeInput.value / 100, forwardSpeed: forawrdSpeedInput.value, sidewaysSpeed: rightSpeedInput.value });
-    droneBody.controller.SetParameters({ altitude: altitudeInput.value / 100, forwardSpeed: forawrdSpeedInput.value, sidewaysSpeed: rightSpeedInput.value });
+    console.log({ altitude: altitudeInput.value / 100, roll: rollInput.value, pitch: pitchInput.value, yaw: yawInput.value });
+    droneBody.controller.SetParameters({ altitude: altitudeInput.value / 100, roll: rollInput.value, pitch: pitchInput.value, yaw: -1 * yawInput.value });
 };
 const altitudeInput = document.getElementById('altitude');
 altitudeInput.onchange = setParameters;
-const forawrdSpeedInput = document.getElementById('forward-speed');
-forawrdSpeedInput.onchange = setParameters;
-const rightSpeedInput = document.getElementById('right-speed');
-rightSpeedInput.onchange = setParameters;
+const rollInput = document.getElementById('roll');
+rollInput.onchange = setParameters;
+const pitchInput = document.getElementById('pitch');
+pitchInput.onchange = setParameters;
+const yawInput = document.getElementById('yaw');
+yawInput.onchange = setParameters;
+setTimeout(() => {
+    document.getElementById("yaw").value = -0.5;
+    setParameters();
+}, 1000);
 setParameters();
 animate(renderer, scene, camera, world, [droneBody]);
