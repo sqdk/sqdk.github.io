@@ -1,22 +1,17 @@
+import * as THREE from '/build/three.module.js';
 import { clamp } from "./utils.js";
 export class DronePIDController {
-    constructor(propellerConfiguration, AltitudeProportional, AltitudeIntegral, AltitudeDerivative, RollControllerProportional, RollControllerIntegral, RollControllerDerivative, YawControllerProportional, YawControllerIntegral, YawControllerDerivative, deltaT) {
+    constructor(propellerConfiguration, AltitudePIDParams, RollPitchPIDParams, YawPIDParams, deltaT) {
         this.propellerConfiguration = propellerConfiguration;
-        this.AltitudeProportional = AltitudeProportional;
-        this.AltitudeIntegral = AltitudeIntegral;
-        this.AltitudeDerivative = AltitudeDerivative;
-        this.RollControllerProportional = RollControllerProportional;
-        this.RollControllerIntegral = RollControllerIntegral;
-        this.RollControllerDerivative = RollControllerDerivative;
-        this.YawControllerProportional = YawControllerProportional;
-        this.YawControllerIntegral = YawControllerIntegral;
-        this.YawControllerDerivative = YawControllerDerivative;
+        this.AltitudePIDParams = AltitudePIDParams;
+        this.RollPitchPIDParams = RollPitchPIDParams;
+        this.YawPIDParams = YawPIDParams;
         this.deltaT = deltaT;
         this.Step = (position, velocity, rotation, angularVelocity) => {
             const altitudeCorrection = clamp(this.AltitudeController.update(position.y), 0, 100);
             const rollCorrection = clamp(this.RollController.update(rotation.z), -50, 50);
             const pitchCorrection = clamp(this.PitchController.update(rotation.x), -50, 50);
-            const yawCorrection = clamp(this.YawController.update(rotation.y), -50, 50);
+            const yawCorrection = clamp(this.YawController.update(rotation.y), -50, 50); //+rotation.w
             const altDisplay = document.getElementById("current-altitude");
             altDisplay.innerHTML = `Target: ${this.AltitudeController.getTarget()} Distance from target: ${(position.y - this.AltitudeController.getTarget()).toFixed(2)} ; Altitude: ${position.y.toFixed(2)} ; Thrust: ${altitudeCorrection.toFixed(2)}`;
             const rollDisplay = document.getElementById("current-roll");
@@ -35,19 +30,59 @@ export class DronePIDController {
             return thrustMap;
         };
         this.SetParameters = (options) => {
-            this.AltitudeController.setTarget(options.altitude);
-            this.RollController.setTarget(options.roll);
-            this.PitchController.setTarget(options.pitch);
-            this.YawController.setTarget(options.yaw);
+            if (options.altitude) {
+                this.AltitudeController.setTarget(options.altitude);
+            }
+            if (options.roll) {
+                this.RollController.setTarget(options.roll);
+            }
+            if (options.pitch) {
+                this.PitchController.setTarget(options.pitch);
+            }
+            if (options.yaw) {
+                this.YawController.setTarget(options.yaw);
+            }
         };
-        this.AltitudeController = new PIDController(this.AltitudeProportional, this.AltitudeIntegral, this.AltitudeDerivative, this.deltaT, 100);
-        this.RollController = new PIDController(this.RollControllerProportional, this.RollControllerIntegral, this.RollControllerDerivative, this.deltaT, 100);
-        this.PitchController = new PIDController(this.RollControllerProportional, this.RollControllerIntegral, this.RollControllerDerivative, this.deltaT, 100);
-        this.YawController = new PIDController(this.YawControllerProportional, this.YawControllerIntegral, this.YawControllerDerivative, this.deltaT, 100);
+        this.AltitudeController = new PIDController(this.AltitudePIDParams.p, this.AltitudePIDParams.i, this.AltitudePIDParams.d, this.deltaT, 100);
+        this.RollController = new PIDController(this.RollPitchPIDParams.p, this.RollPitchPIDParams.i, this.RollPitchPIDParams.d, this.deltaT, 100);
+        this.PitchController = new PIDController(this.RollPitchPIDParams.p, this.RollPitchPIDParams.i, this.RollPitchPIDParams.d, this.deltaT, 100);
+        this.YawController = new PIDController(this.YawPIDParams.p, this.YawPIDParams.i, this.YawPIDParams.d, this.deltaT, 100);
         this.AltitudeController.setTarget(0);
         this.RollController.setTarget(0);
         this.PitchController.setTarget(0);
-        this.YawController.setTarget(0);
+        this.YawController.setTarget(0.5);
+    }
+}
+export class PositionController {
+    constructor(DroneController, XYControllerParams, initialTarget, deltaT, sceneRef) {
+        this.DroneController = DroneController;
+        this.XYControllerParams = XYControllerParams;
+        this.deltaT = deltaT;
+        this.sceneRef = sceneRef;
+        this.Step = (position, velocity, rotation, angularVelocity) => {
+            const xDiff = position.x - this.target.x;
+            const zDiff = position.z - this.target.z; // I am intentionally using Z to flip the coordinate system around to be normal. This may be worse for understanding
+            const zCorrection = clamp(this.ZController.update(zDiff) / 100, -0.5, 0.5);
+            const xCorrection = clamp(this.XController.update(xDiff) / 100, -0.5, 0.5);
+            this.DroneController.SetParameters({
+                altitude: this.target.y,
+                roll: -xCorrection,
+                pitch: zCorrection,
+            });
+            return this.DroneController.Step(position, velocity, rotation, angularVelocity);
+        };
+        this.SetParameters = (params) => {
+            this.target = new CANNON.Vec3(params.x, params.y, params.z);
+            this.targetMesh.position.copy(this.target);
+        };
+        this.XController = new PIDController(this.XYControllerParams.p, this.XYControllerParams.i, this.XYControllerParams.d, this.deltaT, 100);
+        this.ZController = new PIDController(this.XYControllerParams.p, this.XYControllerParams.i, this.XYControllerParams.d, this.deltaT, 100);
+        this.target = initialTarget;
+        const targetMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const targetGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        this.targetMesh = new THREE.Mesh(targetGeometry, targetMaterial);
+        this.targetMesh.position.copy(this.target);
+        this.sceneRef.add(this.targetMesh);
     }
 }
 export var PropellerConfiguration;
@@ -112,5 +147,12 @@ class PIDController {
     }
     getTarget() {
         return this.target;
+    }
+}
+export class PIDParams {
+    constructor(p, i, d) {
+        this.p = p;
+        this.i = i;
+        this.d = d;
     }
 }

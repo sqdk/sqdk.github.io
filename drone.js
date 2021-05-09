@@ -2,7 +2,7 @@ import * as THREE from '/build/three.module.js';
 import { PropellerConfiguration } from "./controller.js";
 import { clamp } from './utils.js';
 export class Drone {
-    constructor(world, sceneRef, initialPosition, initialThrust, maxThrust, minThrust, controller, propellerConfiguration = PropellerConfiguration.QuadCross) {
+    constructor(world, sceneRef, initialPosition, initialRotation, initialThrust, maxThrust, minThrust, controller, propellerConfiguration = PropellerConfiguration.QuadCross) {
         this.sceneRef = sceneRef;
         this.maxThrust = maxThrust;
         this.minThrust = minThrust;
@@ -17,14 +17,14 @@ export class Drone {
             thrust.forEach((v, i) => this.setPropellerThrust(i, v));
         };
         this.propellerThrust = initialThrust;
-        const frame = new CANNON.Vec3(0.25, 0.02, 0.25);
+        const frame = new CANNON.Vec3(0.75, 0.02, 0.75);
         const frameShape = new CANNON.Box(frame);
         this.body = new CANNON.Body({
             mass: 2,
             position: initialPosition
         });
         this.body.addShape(frameShape);
-        //this.body.angularVelocity.set(1, 1, 0)
+        //this.body.quaternion = initialRotation
         this.body.angularDamping = 0.01;
         this.body.linearDamping = 0.01;
         world.addBody(this.body);
@@ -104,8 +104,6 @@ export class Drone {
         this.propellerMeshes.forEach((me, i) => {
             const [x, y, z] = [this.propellerPositions[i].x, this.propellerPositions[i].y, this.propellerPositions[i].z];
         });
-        const thrustValues = this.controller.Step(this.body.position, this.body.velocity, this.body.quaternion, this.body.angularVelocity);
-        this.setAllPropellerThrust(thrustValues);
         this.propellerPositions.forEach((p, i) => {
             const thrustInNewtons = (this.propellerThrust[i] / 100) * this.maxThrust;
             // Apply the upward force from the propellers

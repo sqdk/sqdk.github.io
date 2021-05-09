@@ -1,6 +1,6 @@
 import * as THREE from '/build/three.module.js';
 import '/build/cannon.module.js';
-import { DronePIDController, PropellerConfiguration } from './controller.js';
+import { DronePIDController, PIDParams, PositionController, PropellerConfiguration } from './controller.js';
 import { Drone } from './drone.js';
 import { Line3 } from '/build/three.module.js';
 const animate = (renderer, scene, camera, world, drones) => {
@@ -9,13 +9,13 @@ const animate = (renderer, scene, camera, world, drones) => {
         updatePhysics(world, drones);
         camera.position.x = 0;
         camera.position.y = 0.5;
-        camera.position.z = 2;
-        camera.position.applyQuaternion((new THREE.Quaternion()).copy(drones[0].body.quaternion));
+        camera.position.z = 15;
+        camera.position.applyQuaternion((new THREE.Quaternion()).copy(drones[0][0].body.quaternion));
         camera.quaternion.x = 0; //drones[0].body.quaternion.x
-        camera.quaternion.y = drones[0].body.quaternion.y;
+        camera.quaternion.y = drones[0][0].body.quaternion.y;
         camera.quaternion.z = 0; //drones[0].body.quaternion.z
-        camera.quaternion.w = drones[0].body.quaternion.w;
-        camera.position.add(drones[0].body.position);
+        camera.quaternion.w = drones[0][0].body.quaternion.w;
+        camera.position.add(drones[0][0].body.position);
         render(renderer, scene, camera);
     };
     animator();
@@ -29,10 +29,10 @@ function initCannon() {
 }
 function initThree() {
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
-    camera.position.z = 1.8;
-    camera.position.y = 0.75;
-    camera.quaternion.x = -0.2;
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
+    camera.rotateY(Math.PI);
+    camera.position.z = 0;
+    camera.position.y = 30;
     scene.add(camera);
     const heightGraph = new Line3();
     const renderer = new THREE.WebGLRenderer();
@@ -48,7 +48,7 @@ function initThree() {
     return [scene, camera, renderer];
 }
 function addWorldPlane(world, scene) {
-    const coords = new CANNON.Vec3(25, 1, 25);
+    const coords = new CANNON.Vec3(50, 0.1, 50);
     const shape = new CANNON.Box(coords);
     const rotation = new CANNON.Quaternion(0, 0, 0, 0);
     const position = new CANNON.Vec3(0, 0, 0);
@@ -69,16 +69,34 @@ function addWorldPlane(world, scene) {
     return [mesh, body];
 }
 function addDrone(world, scene, initialPosition) {
-    const stableController = new DronePIDController(PropellerConfiguration.QuadCross, 2, 0.5, 3, 1, 0, 3, 2, 0, 3, 1 / 60);
-    const drone = new Drone(world, scene, initialPosition, [100, 100, 100, 100], 25, 0, stableController, PropellerConfiguration.QuadCross);
-    return drone;
+    const altitudeParams = new PIDParams(16, 1, 4);
+    const rollPitchParams = new PIDParams(3, 0, 6);
+    const yawParams = new PIDParams(2, 0, 3);
+    const stableController = new DronePIDController(PropellerConfiguration.QuadCross, altitudeParams, rollPitchParams, yawParams, 1 / 60);
+    const XYControllerParams = new PIDParams(3, 0, 10);
+    // const XYControllerParams = new PIDParams(0,0,0)
+    const positionController = new PositionController(stableController, XYControllerParams, new CANNON.Vec3(0, 25, 20), 1 / 60, scene);
+    const drone = new Drone(world, scene, initialPosition, new CANNON.Quaternion(0, 0, 0, 0), [100, 100, 100, 100], 18, 0, stableController, PropellerConfiguration.QuadCross);
+    return [drone, stableController, positionController];
 }
 function updatePhysics(world, drones) {
     const timeStep = 1 / 60;
     // Step the physics world
     world.step(timeStep);
     for (let i = 0; i < drones.length; i++) {
-        const drone = drones[i];
+        const drone = drones[i][0];
+        const positionController = drones[i][2];
+        const thrustMap = positionController.Step(drone.body.position, drone.body.velocity, drone.body.quaternion, drone.body.angularVelocity);
+        drone.setAllPropellerThrust(thrustMap);
+        const posDisplay = document.getElementById("current-pos");
+        posDisplay.innerHTML = `Target: (${positionController.target.x}, ${positionController.target.y}) Current position: (${drone.body.position.x}, ${drone.body.position.z})`;
+        if (drone.body.position.distanceTo(positionController.target) < 0.5) {
+            positionController.SetParameters({
+                x: Math.random() * 10,
+                y: Math.random() * 10,
+                z: Math.random() * 10
+            });
+        }
         // Copy coordinates from Cannon.js to Three.js
         drone.droneFrame.position.x = drone.body.position.x;
         drone.droneFrame.position.y = drone.body.position.y;
@@ -95,11 +113,11 @@ function render(renderer, scene, camera) {
 }
 const [scene, camera, renderer] = initThree();
 const world = initCannon();
-const droneBody = addDrone(world, scene, new CANNON.Vec3(0, 1, 0));
+const droneBody = addDrone(world, scene, new CANNON.Vec3(25, 40, 25));
 const worldPlane = addWorldPlane(world, scene);
 const setParameters = () => {
     console.log({ altitude: altitudeInput.value / 100, roll: rollInput.value, pitch: pitchInput.value, yaw: yawInput.value });
-    droneBody.controller.SetParameters({ altitude: altitudeInput.value / 100, roll: rollInput.value, pitch: pitchInput.value, yaw: -1 * yawInput.value });
+    droneBody[1].SetParameters({ altitude: altitudeInput.value / 100, roll: rollInput.value, pitch: pitchInput.value, yaw: -1 * yawInput.value });
 };
 const altitudeInput = document.getElementById('altitude');
 altitudeInput.onchange = setParameters;
@@ -110,7 +128,7 @@ pitchInput.onchange = setParameters;
 const yawInput = document.getElementById('yaw');
 yawInput.onchange = setParameters;
 setTimeout(() => {
-    document.getElementById("yaw").value = -0.5;
+    //(document.getElementById("yaw") as any).value =-0.5
     setParameters();
 }, 1000);
 setParameters();
