@@ -69,11 +69,11 @@ function addWorldPlane(world, scene) {
     return [mesh, body];
 }
 function addDrone(world, scene, initialPosition) {
-    const altitudeParams = new PIDParams(16, 1, 4);
-    const rollPitchParams = new PIDParams(3, 0, 6);
-    const yawParams = new PIDParams(2, 0, 3);
+    const altitudeParams = new PIDParams(65, 15, 115);
+    const rollPitchParams = new PIDParams(50, 10, 85);
+    const yawParams = new PIDParams(40, 10, 40);
     const stableController = new DronePIDController(PropellerConfiguration.QuadCross, altitudeParams, rollPitchParams, yawParams, 1 / 60);
-    const XYControllerParams = new PIDParams(3, 0, 10);
+    const XYControllerParams = new PIDParams(2, 0, 10);
     // const XYControllerParams = new PIDParams(0,0,0)
     const positionController = new PositionController(stableController, XYControllerParams, new CANNON.Vec3(0, 25, 20), 1 / 60, scene);
     const drone = new Drone(world, scene, initialPosition, new CANNON.Quaternion(0, 0, 0, 0), [100, 100, 100, 100], 18, 0, stableController, PropellerConfiguration.QuadCross);
@@ -92,9 +92,9 @@ function updatePhysics(world, drones) {
         posDisplay.innerHTML = `Target: (${positionController.target.x}, ${positionController.target.y}) Current position: (${drone.body.position.x}, ${drone.body.position.z})`;
         if (drone.body.position.distanceTo(positionController.target) < 0.5) {
             positionController.SetParameters({
-                x: Math.random() * 10,
-                y: Math.random() * 10,
-                z: Math.random() * 10
+                x: Math.random() * 100,
+                y: Math.random() * 100,
+                z: Math.random() * 100
             });
         }
         // Copy coordinates from Cannon.js to Three.js

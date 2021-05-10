@@ -11,7 +11,7 @@ export class DronePIDController {
             const altitudeCorrection = clamp(this.AltitudeController.update(position.y), 0, 100);
             const rollCorrection = clamp(this.RollController.update(rotation.z), -50, 50);
             const pitchCorrection = clamp(this.PitchController.update(rotation.x), -50, 50);
-            const yawCorrection = clamp(this.YawController.update(rotation.y), -50, 50); //+rotation.w
+            const yawCorrection = clamp(this.YawController.update(rotation.y), -50, 50);
             const altDisplay = document.getElementById("current-altitude");
             altDisplay.innerHTML = `Target: ${this.AltitudeController.getTarget()} Distance from target: ${(position.y - this.AltitudeController.getTarget()).toFixed(2)} ; Altitude: ${position.y.toFixed(2)} ; Thrust: ${altitudeCorrection.toFixed(2)}`;
             const rollDisplay = document.getElementById("current-roll");
@@ -50,7 +50,7 @@ export class DronePIDController {
         this.AltitudeController.setTarget(0);
         this.RollController.setTarget(0);
         this.PitchController.setTarget(0);
-        this.YawController.setTarget(0.5);
+        this.YawController.setTarget(0);
     }
 }
 export class PositionController {
@@ -61,9 +61,9 @@ export class PositionController {
         this.sceneRef = sceneRef;
         this.Step = (position, velocity, rotation, angularVelocity) => {
             const xDiff = position.x - this.target.x;
-            const zDiff = position.z - this.target.z; // I am intentionally using Z to flip the coordinate system around to be normal. This may be worse for understanding
-            const zCorrection = clamp(this.ZController.update(zDiff) / 100, -0.5, 0.5);
-            const xCorrection = clamp(this.XController.update(xDiff) / 100, -0.5, 0.5);
+            const zDiff = position.z - this.target.z;
+            const zCorrection = clamp(this.ZController.update(zDiff) / 100, -0.7, 0.7);
+            const xCorrection = clamp(this.XController.update(xDiff) / 100, -0.7, 0.7);
             this.DroneController.SetParameters({
                 altitude: this.target.y,
                 roll: -xCorrection,
