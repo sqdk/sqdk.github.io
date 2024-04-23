@@ -1,8 +1,8 @@
-import * as THREE from '/build/three.module.js';
-import '/build/cannon.module.js';
+import * as THREE from './build/three.module.js';
+import './build/cannon.module.js';
 import { DronePIDController, PIDParams, PositionController, PropellerConfiguration } from './controller.js';
 import { Drone } from './drone.js';
-import { Line3 } from '/build/three.module.js';
+import { Line3 } from './build/three.module.js';
 const animate = (renderer, scene, camera, world, drones) => {
     const animator = () => {
         requestAnimationFrame(animator);

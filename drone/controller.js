@@ -1,4 +1,4 @@
-import * as THREE from '/build/three.module.js';
+import * as THREE from './build/three.module.js';
 import { clamp } from "./utils.js";
 export class DronePIDController {
     constructor(propellerConfiguration, AltitudePIDParams, RollPitchPIDParams, YawPIDParams, deltaT) {
