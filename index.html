@@ -1,32 +1,82 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-	<title>Three.js TypeScript Tutorials by Sean Bradley</title>
-	<style>
+    <title>Countdown to my Girlfriend's Visit</title>
+    <style>
         body {
-            overflow: hidden;
-            margin: 0px;
-            background-color: black;
+            background-size: cover;
+            color: black;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #countdown {
+            font-size: 50px;
+        }
+        .img-bg {
+            opacity: 0.1;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        div {
-            color: blue;
-        }
     </style>
 </head>
-
 <body>
-    <div>
-        Altitude (y) (m): <input id=altitude type="range" min="50" max="5000" value="3000"> <span id="current-altitude"></span><br>
-        Roll (z) (m/s): <input id=roll type="range" min="-1" max="1" step=0.01 value="0.000"><span id="current-roll"></span><br>
-        Pitch (x) (m/s): <input id=pitch type="range" min="-1" max="1" step=0.01 value="0.000"> <span id="current-pitch"></span><br>
-        Yaw (y) (m/s): <input id=yaw type="range" min="-0.99" max="0.99" step=0.1 value="0.00"> <span id="current-yaw"></span><br>
-        Position (y) (m/s): <input id=yaw type="range" min="-0.99" max="0.99" step=0.1 value="-0.500"> <span id="current-pos"></span><br>
+    <div id="countdown">
+        <!-- Countdown timer will be inserted here -->
     </div>
-    <div>
-    </div>
-	<script type="module" src="client.js"></script>
-</body>
 
+    <script>
+        // Set the date we're counting down to
+        var countDownDate = new Date("May 11, 2024 12:15:00").getTime();
+
+        // Update the count down every 1 second
+        var countdownfunction = setInterval(function() {
+
+            // Get today's date and time
+            var now = new Date().getTime();
+
+            // Find the distance between now and the count down date
+            var distance = countDownDate - now;
+
+            // Time calculations for days, hours, minutes and seconds
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the result in the element with id="countdown"
+            document.getElementById("countdown").innerHTML = days + "d " + hours + "h "
+            + minutes + "m " + seconds + "s ";
+
+            // If the count down is finished, write some text
+            if (distance < 0) {
+                clearInterval(countdownfunction);
+                document.getElementById("countdown").innerHTML = "She's here!";
+            }
+        }, 1000);
+
+        // Gradually reveal the background image
+        var revealInterval = setInterval(function() {
+            // Get today's date and time
+            var now = new Date().getTime();
+
+            // Find the distance between now and the count down date
+            var distance = countDownDate - now;
+
+            // Time calculations for days, hours, minutes and seconds
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            document.body.style.opacity = (100 - days) + '%';
+        }, 100);
+    </script>
+    <img class="img-bg" src="background.jpeg"></img>
+</body>
 </html>

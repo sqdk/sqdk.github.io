@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Three.js TypeScript Tutorials by Sean Bradley</title>
+	<style>
+        body {
+            overflow: hidden;
+            margin: 0px;
+            background-color: black;
+        }
+
+        div {
+            color: blue;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        Altitude (y) (m): <input id=altitude type="range" min="50" max="5000" value="3000"> <span id="current-altitude"></span><br>
+        Roll (z) (m/s): <input id=roll type="range" min="-1" max="1" step=0.01 value="0.000"><span id="current-roll"></span><br>
+        Pitch (x) (m/s): <input id=pitch type="range" min="-1" max="1" step=0.01 value="0.000"> <span id="current-pitch"></span><br>
+        Yaw (y) (m/s): <input id=yaw type="range" min="-0.99" max="0.99" step=0.1 value="0.00"> <span id="current-yaw"></span><br>
+        Position (y) (m/s): <input id=yaw type="range" min="-0.99" max="0.99" step=0.1 value="-0.500"> <span id="current-pos"></span><br>
+    </div>
+    <div>
+    </div>
+	<script type="module" src="client.js"></script>
+</body>
+
+</html>

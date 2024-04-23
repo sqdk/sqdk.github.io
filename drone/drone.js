@@ -1,4 +1,4 @@
-import * as THREE from '/build/three.module.js';
+import * as THREE from './build/three.module.js';
 import { PropellerConfiguration } from "./controller.js";
 import { clamp } from './utils.js';
 export class Drone {
@@ -92,7 +92,7 @@ export class Drone {
             pos.copy(this.propellerPositions[i]);
             // Apply the current (rotation) of the frame to the vector
             pos.applyQuaternion(this.droneFrame.quaternion);
-            // Finally, add the position vector of the frame the vector to the final position. Instead of 0,0, the 
+            // Finally, add the position vector of the frame the vector to the final position. Instead of 0,0, the
             // starting point of the vector is now the centerpoint of the drone frame
             pos.add(this.droneFrame.position);
             me.position.copy(pos);
