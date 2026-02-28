@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Montserrat:wght@200;400&display=swap" rel="stylesheet">
-    <style>
+    <style is:global>
         :root {
             --primary: #e0c3fc;
             --secondary: #8ec5fc;
@@ -42,23 +42,34 @@
 
         .particle {
             position: absolute;
-            bottom: -10px;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
-            border-radius: 50%;
+            bottom: -50px;
             opacity: 0;
             animation: float-up linear infinite;
+            /* Remove background, let emoji text show naturally */
+            background: none;
+            border-radius: 0;
+            user-select: none;
+            pointer-events: none;
+            /* Ensure emojis aren't clipped or forced into a column */
+            white-space: nowrap;
         }
 
         @keyframes float-up {
             0% {
-                transform: translateY(0) scale(0);
+                transform: translateY(0) rotate(0deg) scale(0.5);
                 opacity: 0;
             }
-            20% {
-                opacity: 0.6;
+            10% {
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-50vh) rotate(20deg) scale(1);
+            }
+            90% {
+                opacity: 0.3;
             }
             100% {
-                transform: translateY(-110vh) scale(1.5);
+                transform: translateY(-110vh) rotate(-20deg) scale(1.2);
                 opacity: 0;
             }
         }
@@ -222,9 +233,10 @@
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // Particle System
+        // Particle System (Hearts)
         const particlesContainer = document.getElementById('particles');
-        const particleCount = 50;
+        const particleCount = 35; // Slightly fewer so it's not overwhelming
+        const hearts = ['❤️', '🤍', '✨', '💖', '💕'];
 
         function createParticle() {
             if (!particlesContainer) return;
@@ -232,19 +244,22 @@
             const particle = document.createElement('div');
             particle.classList.add('particle');
 
-            const size = Math.random() * 5 + 2;
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
+            // Pick a random heart/emoji
+            particle.innerText = hearts[Math.floor(Math.random() * hearts.length)];
 
-            // Random horizontal position
-            particle.style.left = `${Math.random() * 100}vw`;
+            // Random font size instead of width/height
+            const fontSize = Math.random() * 1.5 + 0.8; // 0.8rem to 2.3rem
+            particle.style.fontSize = `${fontSize}rem`;
+
+            // Random horizontal position, keeping them mostly within view
+            particle.style.left = `${Math.random() * 95}vw`;
 
             // Random animation duration
-            const duration = Math.random() * 10 + 10; // 10-20s
+            const duration = Math.random() * 15 + 15; // 15-30s (slower floating)
             particle.style.animationDuration = `${duration}s`;
 
             // Random delay so they don't all start at once
-            const delay = Math.random() * 20;
+            const delay = Math.random() * 30;
             particle.style.animationDelay = `-${delay}s`;
 
             particlesContainer.appendChild(particle);
