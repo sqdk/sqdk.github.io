@@ -87,23 +87,21 @@
             width: 600px;
         }
 
-        .image-placeholder {
+        .profile-picture {
             width: 150px;
             height: 150px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px dashed rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             margin: 0 auto 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(142, 197, 252, 0.2);
+            display: block;
+            box-shadow: 0 0 20px rgba(142, 197, 252, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            object-fit: cover;
             transition: all 0.5s ease;
         }
 
-        .image-placeholder:hover {
-            box-shadow: 0 0 30px rgba(224, 195, 252, 0.4);
-            border-color: rgba(255, 255, 255, 0.4);
+        .profile-picture:hover {
+            box-shadow: 0 0 30px rgba(224, 195, 252, 0.8);
+            transform: scale(1.05);
         }
 
         h1 {
@@ -168,10 +166,8 @@
     <div id="particles"></div>
 
     <div class="container">
-        <!-- Image Placeholder -->
-        <div class="image-placeholder">
-            <span style="font-size: 2rem; opacity: 0.3;">❤️</span>
-        </div>
+        <!-- Profile Picture -->
+        <img src="/franny.jpeg" alt="Franny" class="profile-picture" />
 
         <h1>Until you're home</h1>
 
