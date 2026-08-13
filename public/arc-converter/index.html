@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Reference Curve Converter — REW ↔ ARC</title>
+<style>
+  :root {
+    --bg: #14171c; --panel: #1c2129; --edge: #2b323d; --ink: #e6e9ee;
+    --muted: #97a0ad; --accent: #FA4A34; --accent2: #4a9eff; --ok: #46c17a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 14px/1.5 -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg); color: var(--ink);
+  }
+  header { padding: 20px 24px; border-bottom: 1px solid var(--edge); }
+  h1 { margin: 0; font-size: 18px; }
+  h1 small { color: var(--muted); font-weight: 400; font-size: 13px; }
+  main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 24px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 14px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  select, button {
+    background: #232a33; color: var(--ink); border: 1px solid var(--edge);
+    border-radius: 7px; padding: 7px 11px; font-size: 13px; cursor: pointer;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button:hover { border-color: var(--accent2); }
+  textarea {
+    width: 100%; height: 320px; resize: vertical; background: #12151a; color: var(--ink);
+    border: 1px solid var(--edge); border-radius: 8px; padding: 10px; font: 12px/1.45 ui-monospace, Menlo, monospace;
+  }
+  .drop { border: 1px dashed var(--edge); border-radius: 8px; padding: 8px 11px; color: var(--muted); font-size: 12px; }
+  .drop.hot { border-color: var(--accent); color: var(--ink); }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 20px; background: #232a33; color: var(--muted); }
+  .badge.ok { color: var(--ok); }
+  canvas { width: 100%; height: 220px; display: block; background: #12151a; border-radius: 8px; border: 1px solid var(--edge); }
+  .note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .legend { display: flex; gap: 16px; font-size: 12px; margin-top: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 3px; vertical-align: middle; margin-right: 5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Reference Curve Converter <small>— REW · Dirac · atref ↔ ARC</small></h1>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="row">
+      <label>Input</label>
+      <span id="detected" class="badge">no file</span>
+      <span style="flex:1"></span>
+      <label for="fromFmt">from</label>
+      <select id="fromFmt">
+        <option value="auto">auto-detect</option>
+        <option value="rew">REW (.txt)</option>
+        <option value="dirac">Dirac (.targetcurve)</option>
+        <option value="atref">atref (.atref)</option>
+        <option value="arc">ARC (.arc)</option>
+      </select>
+    </div>
+    <div id="drop" class="drop">Drop a file here, or paste its contents below.
+      <input id="file" type="file" style="display:none">
+      <button id="browse" style="padding:2px 8px; margin-left:6px;">browse…</button>
+    </div>
+    <textarea id="input" spellcheck="false" placeholder="Paste REW / Dirac / atref / ARC text here…"></textarea>
+  </section>
+
+  <section class="panel">
+    <div class="row">
+      <label for="toFmt">Output</label>
+      <select id="toFmt">
+        <option value="arc">ARC (.arc)</option>
+        <option value="atref">atref (.atref)</option>
+        <option value="rew">REW (.txt)</option>
+        <option value="dirac">Dirac (.targetcurve)</option>
+      </select>
+      <button id="convert" class="primary">Convert →</button>
+      <span style="flex:1"></span>
+      <button id="download">Download</button>
+    </div>
+    <textarea id="output" spellcheck="false" placeholder="Converted output appears here…"></textarea>
+  </section>
+
+  <section class="panel" style="grid-column: 1 / -1;">
+    <label>Curve preview</label>
+    <canvas id="plot" width="1200" height="440"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--accent2)"></i>input curve</span>
+      <span><i style="background:var(--accent)"></i>output (as the target reads it back)</span>
+    </div>
+    <div class="note" id="note"></div>
+  </section>
+</main>
+
+<script src="converter.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const R = window.RefCurve;
+
+  function currentFrom() {
+    const sel = $('fromFmt').value;
+    return sel === 'auto' ? R.detectFormat($('input').value || '') : sel;
+  }
+
+  function refreshDetected() {
+    const txt = $('input').value.trim();
+    const badge = $('detected');
+    if (!txt) { badge.textContent = 'no file'; badge.className = 'badge'; return; }
+    badge.textContent = 'detected: ' + R.detectFormat(txt);
+    badge.className = 'badge ok';
+  }
+
+  // ---- plotting -----------------------------------------------------------
+  function plot(inCurve, outCurve) {
+    const c = $('plot'), ctx = c.getContext('2d');
+    const W = c.width, H = c.height, padL = 44, padR = 14, padT = 14, padB = 26;
+    ctx.clearRect(0, 0, W, H);
+    const fMin = 20, fMax = 22000;
+    const all = [].concat(inCurve ? inCurve.points : [], outCurve ? outCurve.points : []);
+    let gMin = -8, gMax = 12;
+    all.forEach((p) => { gMin = Math.min(gMin, p.g); gMax = Math.max(gMax, p.g); });
+    gMin = Math.floor(gMin) - 1; gMax = Math.ceil(gMax) + 1;
+    const x = (f) => padL + (Math.log10(f) - Math.log10(fMin)) / (Math.log10(fMax) - Math.log10(fMin)) * (W - padL - padR);
+    const y = (g) => padT + (gMax - g) / (gMax - gMin) * (H - padT - padB);
+
+    ctx.strokeStyle = '#2b323d'; ctx.fillStyle = '#97a0ad'; ctx.lineWidth = 1;
+    ctx.font = '11px sans-serif';
+    [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000].forEach((f) => {
+      ctx.beginPath(); ctx.moveTo(x(f), padT); ctx.lineTo(x(f), H - padB); ctx.stroke();
+      ctx.fillText(f >= 1000 ? (f / 1000) + 'k' : f, x(f) - 8, H - padB + 14);
+    });
+    for (let g = Math.ceil(gMin / 2) * 2; g <= gMax; g += 2) {
+      ctx.beginPath(); ctx.moveTo(padL, y(g)); ctx.lineTo(W - padR, y(g)); ctx.stroke();
+      ctx.fillText(g + '', 6, y(g) + 3);
+    }
+    const draw = (curve, color) => {
+      if (!curve || !curve.points.length) return;
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+      curve.points.forEach((p, i) => { const px = x(p.f), py = y(p.g); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+      ctx.stroke();
+    };
+    draw(inCurve, getComputedStyle(document.documentElement).getPropertyValue('--accent2').trim());
+    draw(outCurve, getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
+  }
+
+  // ---- convert ------------------------------------------------------------
+  function doConvert() {
+    const txt = $('input').value;
+    if (!txt.trim()) { $('note').textContent = 'Nothing to convert.'; return; }
+    const from = currentFrom(), to = $('toFmt').value;
+    try {
+      const inCurve = R[fromFn(from)](txt);
+      const out = R.convert(txt, from, to);
+      $('output').value = out;
+      // read the OUTPUT back to a curve so the plot shows what the target sees
+      const outCurve = R[fromFn(to)](out);
+      plot(inCurve, outCurve);
+      const err = maxDelta(inCurve, outCurve);
+      $('note').textContent = 'Converted ' + from + ' → ' + to +
+        '.  Max readback error vs input: ' + err.toFixed(1) + ' dB' +
+        (to === 'arc' ? '  (≈1 dB is inherent — the ARC grid is sparse).' : '.');
+    } catch (e) {
+      $('note').textContent = 'Error: ' + e.message;
+    }
+  }
+  const fromFn = (fmt) => ({ rew: 'fromREW', dirac: 'fromDirac', atref: 'fromAtref', arc: 'fromARC' }[fmt]);
+
+  function maxDelta(a, b) {
+    let m = 0;
+    R.ISO_BANDS.forEach((f) => { m = Math.max(m, Math.abs(R.sampleCurve(a, f) - R.sampleCurve(b, f))); });
+    return m;
+  }
+
+  function download() {
+    const ext = { rew: 'txt', dirac: 'targetcurve', atref: 'atref', arc: 'arc' }[$('toFmt').value];
+    const blob = new Blob([$('output').value], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'reference_curve.' + ext;
+    a.click(); URL.revokeObjectURL(a.href);
+  }
+
+  // ---- file drop / browse -------------------------------------------------
+  function loadFile(file) {
+    const r = new FileReader();
+    r.onload = () => { $('input').value = r.result; refreshDetected(); doConvert(); };
+    r.readAsText(file);
+  }
+  const drop = $('drop');
+  ['dragenter', 'dragover'].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add('hot'); }));
+  ['dragleave', 'drop'].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.remove('hot'); }));
+  drop.addEventListener('drop', (ev) => { if (ev.dataTransfer.files[0]) loadFile(ev.dataTransfer.files[0]); });
+  $('browse').addEventListener('click', () => $('file').click());
+  $('file').addEventListener('change', (ev) => { if (ev.target.files[0]) loadFile(ev.target.files[0]); });
+
+  $('input').addEventListener('input', refreshDetected);
+  $('convert').addEventListener('click', doConvert);
+  $('download').addEventListener('click', download);
+})();
+</script>
+</body>
+</html>
