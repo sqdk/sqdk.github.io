@@ -10,12 +10,17 @@ import nordicLogo from '../assets/nordic_api_gateway_logo.png';
 import unityLogo from '../assets/unity_logo.png';
 import trustpilotLogo from '../assets/trustpilo_logo.png';
 
-const topSkills = ["Cloud Architecture", "DevOps", "Platform Engineering", "Site Reliability Engineering", "DevEx"];
-const technologies = ["AWS", "Azure", "Kubernetes", "Pulumi", "Terraform", "Docker"];
-const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
+const skillGroups = [
+	{ name: "Languages", items: ["Go", "TypeScript", "Python", "C#", "F#"] },
+	{ name: "Platform", items: ["Kubernetes (EKS)", "AWS", "Azure", "Pulumi", "Terraform", "CI/CD"] },
+	{ name: "Practices", items: ["Platform engineering", "Developer experience", "SOC 2 / security by design", "Incident management"] },
+];
 ---
 
-<Layout title="Christian Probst | Senior DevOps & Platform Engineer">
+<Layout
+	title="Christian Probst | Staff Platform Engineer"
+	description="Staff Platform Engineer. Infrastructure software in Go & TypeScript · Kubernetes · AWS. Copenhagen, Denmark."
+>
 	<main class="max-w-4xl mx-auto px-4 py-24">
 		<header class="mb-16">
 			<div class="flex flex-col md:flex-row justify-between items-start gap-8">
@@ -33,9 +38,9 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 						<h1 class="text-4xl md:text-6xl font-bold text-accent opacity-0 animate-reveal-up signature mb-2 leading-tight whitespace-nowrap">
 							Christian Probst
 						</h1>
-						<p class="text-xl md:text-2xl text-white/80 opacity-0 animate-fade-in whitespace-nowrap">Senior DevOps Engineer @ Complexio</p>
+						<p class="text-xl md:text-2xl text-white/80 opacity-0 animate-fade-in whitespace-nowrap">Staff Platform Engineer</p>
 						<div class="opacity-0 animate-fade-in mt-2 space-y-2">
-							<p class="text-white/60">Platform Engineering & AI | Copenhagen, Denmark</p>
+							<p class="text-white/60">Infrastructure software in Go &amp; TypeScript · Kubernetes · AWS | Copenhagen, Denmark</p>
 							<div class="flex flex-wrap gap-4 text-sm text-gray-400">
 								<a href="mailto:christian.probst.dk@gmail.com" class="flex items-center gap-2 hover:text-accent transition-colors">
 									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
@@ -71,10 +76,45 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 		<div class="space-y-16 opacity-0 animate-fade-in">
 			<section>
 				<h2 class="text-2xl font-bold border-b border-gray-800 pb-2 mb-6 uppercase tracking-wider text-accent">Summary</h2>
-				<p class="text-gray-300 leading-relaxed text-lg">
-					Seasoned SRE/DevOps/Platform engineer with more than 10 years of experience, primarily in startups and scaleups. I have worked at several companies that IPO'ed, and enjoy navigating the unknown and solving hard problems. <br\> <br\>
-					I feel at home acting as the connecting tissue between product and infrastructure ensuring product-related engineers can work in a joyful and effective way. I pride myself in my social skills and my ability to talk to any person regardless of function or department, allowing me to indepedently navigate an organisation and make sure my work solves real problems. I am able to balance pragmatism with idealism and understand that the world is never perfect, and a decision, never without compromise.
-				</p>
+				<div class="text-gray-300 leading-relaxed text-lg space-y-4">
+					<p>
+						I'm a platform engineer who started as a software engineer and never stopped writing code.
+						I've built microservices in Go, C# and Python, developer tooling in F# and TypeScript, and
+						infrastructure platforms on AWS, Azure and Kubernetes, mostly at Copenhagen startups and
+						scaleups, several of which went on to IPO.
+					</p>
+					<p>
+						My focus is building platforms engineers actually want to use: self-service tooling, CLIs and
+						APIs that replace tickets and tribal knowledge, and infrastructure designed for where the
+						company is heading. At Dixa I was hired to turn a scrappy startup platform into a fully
+						codified, self-service one for 60 engineers, and built SOC 2 compliance into it by design.
+						At Complexio, as the first infrastructure hire, I built the foundation for on-premise
+						deployments of a distributed AI system, from VMs to Kubernetes.
+					</p>
+					<p>
+						As a staff engineer and technical lead, I set technical direction across teams, drive
+						architectural decisions, and lead through influence rather than authority. I stay hands-on
+						because the best technical decisions come from people who still write the code.
+					</p>
+				</div>
+			</section>
+
+			<section>
+				<h2 class="text-2xl font-bold border-b border-gray-800 pb-2 mb-6 uppercase tracking-wider text-accent">Skills</h2>
+				<div class="space-y-6">
+					{skillGroups.map((group) => (
+						<div class="print-avoid-break">
+							<h4 class="font-bold text-white mb-3">{group.name}</h4>
+							<div class="flex flex-wrap gap-2">
+								{group.items.map((skill) => (
+									<span class="px-3 py-1 border border-gray-700 rounded-full text-sm text-gray-300 hover:border-accent hover:text-accent transition-colors cursor-default">
+										{skill}
+									</span>
+								))}
+							</div>
+						</div>
+					))}
+				</div>
 			</section>
 
 			<section>
@@ -82,7 +122,7 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 				<div class="space-y-12">
 					<!-- Complexio -->
 					<div class="hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300 group">
-						<div class="flex items-start gap-4 mb-4">
+						<div class="entry-header flex items-start gap-4 mb-4">
 							<div class="w-12 h-12 flex-shrink-0 bg-white p-1 rounded overflow-hidden">
 								<Image src={complexioLogo} alt="Complexio Logo" class="w-full h-full object-contain" />
 							</div>
@@ -95,13 +135,13 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 						</div>
 
 						<div class="ml-16 space-y-6">
-							<div>
-								<p class="text-accent text-lg">Senior DevOps Engineer</p>
+							<div class="role">
+								<p class="text-accent text-lg">Senior DevOps Engineer and Team Lead</p>
 								<p class="text-gray-500 text-sm mb-3">Apr 2024 — Present</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
-									<li>Lead for the infrastructure group managing on-premise deployments of a distributed AI application running on VMs and Kubernetes.</li>
-									<li>First infrastructure hire (#9 employee); defined and matured processes around compliance, security, and internal IT on top of product-related infrastructure.</li>
-									<li>Act as connective tissue between the commercial organisation and product, managing internal stakeholders and converting complex business requirements into actionable tasks.</li>
+									<li>Technical lead for the infrastructure group (7 engineers), owning on-premise deployments of a distributed AI application, from VMs through the migration to Kubernetes.</li>
+									<li>First infrastructure hire (#9 employee); built the foundations for compliance, security and internal IT alongside product infrastructure.</li>
+									<li>Translate complex commercial and customer requirements into technical direction for the team and wider engineering org.</li>
 								</ul>
 							</div>
 						</div>
@@ -109,7 +149,7 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 
 					<!-- Dixa -->
 					<div class="hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300 group">
-						<div class="flex items-start gap-4 mb-4">
+						<div class="entry-header flex items-start gap-4 mb-4">
 							<div class="w-12 h-12 flex-shrink-0 bg-white p-1 rounded overflow-hidden">
 								<Image src={dixaLogo} alt="Dixa Logo" class="w-full h-full object-contain" />
 							</div>
@@ -122,43 +162,42 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 						</div>
 
 						<div class="ml-16 space-y-6">
-							<div>
+							<div class="role">
 								<p class="text-accent text-lg">Staff Engineer, Platform Engineering</p>
 								<p class="text-gray-500 text-sm mb-3">Oct 2022 — Apr 2024</p>
+								<p class="text-gray-400 mb-3">Owned the technical direction of Dixa's infrastructure platform, serving 60 engineers.</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
-									<li>Setting the holistic, long term vision for the infrastructure platform aligning with organizational and business needs.</li>
-									<li>Technical management and enablement, helping solve harder problems and facilitating technical 1:1s to support team motivation.</li>
-									<li>Defining ways of working, facilitating architectural discussions, and defining PR/deployment processes.</li>
-									<li>Facilitating mob/pair programming sessions to accelerate learning.</li>
+									<li>Built SOC 2 readiness into the platform ahead of the audit: least-privilege access, time-limited elevated access, no shared accounts, and a reliable audit trail across both AWS and the Pulumi platform, so compliance was part of the platform's design rather than a scramble at audit time.</li>
+									<li>Evolved the provisioning platform into the standard path for all services, with security, compliance and observability built in by default.</li>
+									<li>Set org-wide engineering standards for PR, deployment and code practices.</li>
+									<li>Mentored engineers through technical 1:1s and mob/pair programming.</li>
 								</ul>
 							</div>
-							<div>
+							<div class="role">
 								<p class="text-accent text-lg">Lead Platform Engineer</p>
 								<p class="text-gray-500 text-sm mb-3">Apr 2021 — Oct 2022</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
-									<li>Setting the holistic, long term vision for the infrastructure platform and ensuring it aligns with organisational and business needs.</li>
-									<li>Technical management - I help solve the harder problems and strive towards enabling the team to make their own decisions and take ownership. Although I don't have direct reports, I still do technical 1:1s with everyone in the team to make sure they are working on things that are motivating and relevant to their needs and interests.</li>
-									<li>Define ways of working within the team - From facilitating architectural discussions to defining PR and deployment processes and how we write our code.</li>
-									<li>Facilitating mob/pair programming sessions - I believe shadowing/working together with someone is the best way to learn.</li>
-									<li>Evangelising the tools we build to the rest of the organisation - I believe I have a knack for talking to people and understanding their needs, which also helps me talk to them in a language they understand.</li>
+									<li>Technical lead of the platform team: set the platform's long-term direction and defined ways of working, from architecture discussions to PR and deployment processes.</li>
+									<li>Drove adoption of the platform's self-service tooling across engineering.</li>
 								</ul>
 							</div>
-							<div>
+							<div class="role">
 								<p class="text-accent text-lg">Senior Platform Engineer</p>
 								<p class="text-gray-500 text-sm mb-3">Aug 2020 — Apr 2021</p>
+								<p class="text-gray-400 mb-3">Hired to replace Dixa's early, hand-built infrastructure with a platform that could scale.</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
-									<li>Led implementation of a new microservice platform on AWS (EKS) designed for 10-100x previous load.</li>
-									<li>Redefined developer interaction with infrastructure through CLI tools, APIs, and web applications.</li>
-									<li>Focused on self-service and "you build it, you own it" culture.</li>
-									<li>Domain expertise: Kubernetes, AWS (IAM, EKS, R53, Networking), Pulumi (TypeScript), CI/CD.</li>
+									<li>Designed and built a fully codified, automated platform for microservice provisioning on AWS EKS.</li>
+									<li>Built the platform's developer interface (CLI tools, APIs and web apps in TypeScript), making "you build it, you own it" practical for 60 engineers.</li>
+									<li>Architected the new microservice platform for 10–100x the previous load, entirely as infrastructure-as-code in Pulumi (TypeScript).</li>
 								</ul>
+								<p class="text-gray-500 text-sm mt-3">Stack: TypeScript · Kubernetes (EKS) · AWS · Pulumi</p>
 							</div>
 						</div>
 					</div>
 
 					<!-- Nordic API Gateway -->
 					<div class="hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300 group">
-						<div class="flex items-start gap-4 mb-4">
+						<div class="entry-header flex items-start gap-4 mb-4">
 							<div class="w-12 h-12 flex-shrink-0 bg-white p-1 rounded overflow-hidden">
 								<Image src={nordicLogo} alt="Nordic API Gateway Logo" class="w-full h-full object-contain" />
 							</div>
@@ -171,22 +210,27 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 						</div>
 
 						<div class="ml-16 space-y-6">
-							<div>
+							<div class="role">
 								<p class="text-accent text-lg">DevOps Tech Lead</p>
-								<p class="text-gray-500 text-sm mb-3">May 2019 — Aug 2020</p>
+								<p class="text-gray-500 text-sm mb-3">Oct 2019 — Aug 2020</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
 									<li>Lead for the DevOps team responsible for IaC automation and optimizing software development processes.</li>
 									<li>Architected and implemented a microservice foundation in Azure.</li>
 									<li>Introduced Terraform with a focus on developer usability.</li>
-									<li>Built a scalable system for calculating microservice uptime archived in a custom data warehouse.</li>
+									<li>Built a scalable system for calculating microservice uptime stored in a custom data warehouse.</li>
 								</ul>
+							</div>
+							<div class="role">
+								<p class="text-accent text-lg">DevOps Engineer</p>
+								<p class="text-gray-500 text-sm">May 2019 — Oct 2019</p>
+								<p class="text-gray-500 text-sm mt-3">Stack: Azure · Kubernetes · TypeScript · C# · Terraform · Azure Functions · Grafana</p>
 							</div>
 						</div>
 					</div>
 
 					<!-- Unity -->
 					<div class="hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300 group">
-						<div class="flex items-start gap-4 mb-4">
+						<div class="entry-header flex items-start gap-4 mb-4">
 							<div class="w-12 h-12 flex-shrink-0 bg-white p-1 rounded overflow-hidden">
 								<Image src={unityLogo} alt="Unity Logo" class="w-full h-full object-contain" />
 							</div>
@@ -199,7 +243,7 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 						</div>
 
 						<div class="ml-16 space-y-6">
-							<div>
+							<div class="role">
 								<p class="text-accent text-lg">Software Developer</p>
 								<p class="text-gray-500 text-sm mb-3">Oct 2017 — Apr 2019</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
@@ -212,7 +256,7 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 
 					<!-- Trustpilot -->
 					<div class="hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300 group">
-						<div class="flex items-start gap-4 mb-4">
+						<div class="entry-header flex items-start gap-4 mb-4">
 							<div class="w-12 h-12 flex-shrink-0 bg-white p-1 rounded overflow-hidden">
 								<Image src={trustpilotLogo} alt="Trustpilot Logo" class="w-full h-full object-contain" />
 							</div>
@@ -225,12 +269,12 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 						</div>
 
 						<div class="ml-16 space-y-6">
-							<div>
+							<div class="role">
 								<p class="text-accent text-lg">Full Stack Developer</p>
 								<p class="text-gray-500 text-sm mb-3">Sep 2015 — Sep 2017</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
-									<li>Managed infrastructure and software concerning integration, build, and deployment.</li>
-									<li>Extensive use of AWS (EC2, Lambda, SQS, SNS, IAM, Kinesis, DynamoDB, ECS).</li>
+									<li>Built microservices in Go, C#, Python and JavaScript on AWS (Lambda, SQS, SNS, Kinesis, API Gateway, DynamoDB, ECS).</li>
+									<li>Owned build, deployment and tooling infrastructure; proposed tooling and architecture best practices adopted by other teams.</li>
 								</ul>
 							</div>
 						</div>
@@ -238,63 +282,25 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 				</div>
 			</section>
 
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-				<section>
-					<h2 class="text-2xl font-bold border-b border-gray-800 pb-2 mb-6 uppercase tracking-wider text-accent">Skills</h2>
-					<div class="space-y-6">
-						<div>
-							<h4 class="font-bold text-white mb-3">Top Skills</h4>
-							<div class="flex flex-wrap gap-2">
-								{topSkills.map((skill) => (
-									<span class="px-3 py-1 border border-gray-700 rounded-full text-sm text-gray-300 hover:border-accent hover:text-accent transition-colors cursor-default">
-										{skill}
-									</span>
-								))}
-							</div>
-						</div>
-						<div>
-							<h4 class="font-bold text-white mb-3">Technologies</h4>
-							<div class="flex flex-wrap gap-2">
-								{technologies.map((tech) => (
-									<span class="px-3 py-1 border border-gray-700 rounded-full text-sm text-gray-300 hover:border-accent hover:text-accent transition-colors cursor-default">
-										{tech}
-									</span>
-								))}
-							</div>
-						</div>
-						<div>
-							<h4 class="font-bold text-white mb-3">Languages</h4>
-							<div class="flex flex-wrap gap-2">
-								{languages.map((lang) => (
-									<span class="px-3 py-1 border border-gray-700 rounded-full text-sm text-gray-300 hover:border-accent hover:text-accent transition-colors cursor-default">
-										{lang}
-									</span>
-								))}
-							</div>
-						</div>
-					</div>
-				</section>
-
-				<section>
-					<h2 class="text-2xl font-bold border-b border-gray-800 pb-2 mb-6 uppercase tracking-wider text-accent">Languages</h2>
-					<div class="space-y-2 text-gray-300">
-						<p><span class="font-bold text-white">Danish:</span> Native or Bilingual</p>
-						<p><span class="font-bold text-white">English:</span> Native or Bilingual</p>
-					</div>
-				</section>
-			</div>
+			<section>
+				<h2 class="text-2xl font-bold border-b border-gray-800 pb-2 mb-6 uppercase tracking-wider text-accent">Languages</h2>
+				<div class="space-y-2 text-gray-300">
+					<p><span class="font-bold text-white">Danish:</span> Native or Bilingual</p>
+					<p><span class="font-bold text-white">English:</span> Native or Bilingual</p>
+				</div>
+			</section>
 
 			<section>
 				<h2 class="text-2xl font-bold border-b border-gray-800 pb-2 mb-6 uppercase tracking-wider text-accent">Education</h2>
 				<div class="space-y-6">
-					<div class="hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300">
+					<div class="print-avoid-break hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300">
 						<div class="flex justify-between items-baseline mb-1">
 							<h3 class="text-xl font-bold">Danmarks Tekniske Universitet</h3>
 							<span class="text-gray-500">2010 — 2014</span>
 						</div>
 						<p class="text-gray-400">Bachelor of Applied Science - BASc, IT Engineering</p>
 					</div>
-					<div class="hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300">
+					<div class="print-avoid-break hover:bg-white/5 p-4 -mx-4 rounded-lg transition-colors duration-300">
 						<div class="flex justify-between items-baseline mb-1">
 							<h3 class="text-xl font-bold">CPHWest Ishøj</h3>
 							<span class="text-gray-500">2006 — 2009</span>
@@ -389,7 +395,29 @@ const languages = ["TypeScript", "Go", "Python", "C#", "F#", "Node.js"];
 			color: black !important;
 			text-decoration: none !important;
 		}
-		/* Hide logos in print or keep them? User didn't say, but usually grayscale print is better.
-		   I'll keep them but they might be color depending on printer. */
+		/* Header text uses white-with-alpha classes that vanish on paper */
+		.text-white, .text-white\/80, .text-white\/60 {
+			color: black !important;
+		}
+		.text-white\/60 {
+			color: #374151 !important;
+		}
+		/* Keep headings, role titles and dates with the content that follows them */
+		h2, h3, h4, .entry-header, .role > p {
+			break-after: avoid;
+			page-break-after: avoid;
+		}
+		/* Don't split a bullet, skill group or education entry across pages */
+		li, .print-avoid-break {
+			break-inside: avoid;
+			page-break-inside: avoid;
+		}
+		/* Tighter vertical rhythm on paper */
+		.space-y-16 > :not([hidden]) ~ :not([hidden]) {
+			margin-top: 2.5rem !important;
+		}
+		.space-y-12 > :not([hidden]) ~ :not([hidden]) {
+			margin-top: 1.5rem !important;
+		}
 	}
 </style>

@@ -3,9 +3,10 @@ import GoogleAnalytics from '../components/GoogleAnalytics.astro';
 
 interface Props {
 	title?: string;
+	description?: string;
 }
 
-const { title = "Christian Probst" } = Astro.props;
+const { title = "Christian Probst", description } = Astro.props;
 ---
 
 <!doctype html>
@@ -17,6 +18,11 @@ const { title = "Christian Probst" } = Astro.props;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		{description && <meta name="description" content={description} />}
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		{description && <meta property="og:description" content={description} />}
+		<meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Sacramento&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
@@ -35,5 +41,16 @@ const { title = "Christian Probst" } = Astro.props;
 	}
 	body {
 		margin: 0;
+	}
+	@media print {
+		/* Never print hover tooltips, popovers or other floating overlays */
+		[role="tooltip"], [popover], .tooltip, dialog:not([open]) {
+			display: none !important;
+		}
+		html, body {
+			background: white !important;
+			height: auto !important;
+			overflow: visible !important;
+		}
 	}
 </style>
