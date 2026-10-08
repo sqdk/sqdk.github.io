@@ -139,9 +139,14 @@ const skillGroups = [
 								<p class="text-accent text-lg">Senior DevOps Engineer</p>
 								<p class="text-gray-500 text-sm mb-3">Apr 2024 — Present</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
-									<li>Technical lead for the infrastructure group (7 engineers), owning on-premise deployments of a distributed AI application, from VMs through the migration to Kubernetes.</li>
-									<li>First infrastructure hire (#9 employee); built the foundations for compliance, security and internal IT alongside product infrastructure.</li>
-									<li>Translate complex commercial and customer requirements into technical direction for the team and wider engineering org.</li>
+									<li>Technical lead for the infrastructure group (7 engineers), owning on-premise deployments of a distributed AI application.</li>
+									<li>Led the transition from VMs to managed AKS, shaping the platform around the commercial, security and compliance requirements of large enterprise customers who strictly limit how much access the vendor has.</li>
+									<li>Built a multi-stack Pulumi platform in TypeScript on the Pulumi Automation API, with no CLI needed and security built in: Entra federated access, scope isolation, high-privilege stacks kept apart from the rest, and isolated per-customer stacks.</li>
+									<li>Built a TypeScript wrapper for defining Ansible playbooks and inventories in code, enforcing a standard structure across deployments.</li>
+									<li>Designed just-in-time privileged access with Entra PIM, covering both customer environments and the company's own systems and data, with access requests and renewals as GitHub pull requests so git is the audit log. Built a CLI that lets engineers activate PIM group permissions without leaving the terminal, released once the API supported activating PIM for Groups.</li>
+									<li>Designed the product's authorization system on Entra ID OAuth and fixed issues in existing OAuth implementations. Took on large-scale, AI-assisted refactors of how applications source configuration, because it was a constant source of friction.</li>
+									<li>First infrastructure hire (#9 employee); built the company's security and compliance foundations alongside product infrastructure, including a least-privilege Entra ID directory with role- and title-based access grants, and Intune device restrictions for critical systems such as GitHub and Tailscale.</li>
+									<li>Trusted technical contact for several of the early customers I helped onboard, often short-circuiting communication and greatly cutting turnaround on changes that needed customer involvement.</li>
 								</ul>
 							</div>
 						</div>
@@ -178,6 +183,7 @@ const skillGroups = [
 								<p class="text-gray-500 text-sm mb-3">Apr 2021 — Oct 2022</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
 									<li>Technical lead of the platform team: set the platform's long-term direction and defined ways of working, from architecture discussions to PR and deployment processes.</li>
+									<li>Built an in-cluster web app that let developers deploy with appropriate guardrails, or automate deployments from CI using our managed CI templates.</li>
 									<li>Drove adoption of the platform's self-service tooling across engineering.</li>
 								</ul>
 							</div>
@@ -186,7 +192,9 @@ const skillGroups = [
 								<p class="text-gray-500 text-sm mb-3">Aug 2020 — Apr 2021</p>
 								<p class="text-gray-400 mb-3">Hired to replace Dixa's early, hand-built infrastructure with a platform that could scale.</p>
 								<ul class="list-disc list-outside ml-4 text-gray-400 space-y-2">
-									<li>Designed and built a fully codified, automated platform for microservice provisioning on AWS EKS.</li>
+									<li>Designed and built a fully codified, automated platform for microservice provisioning on AWS EKS, replacing local tooling that pushed straight to an unprotected main branch, which many developers didn't feel confident using.</li>
+									<li>Designed the platform so each service lived in its own stack: teams could raise and review PRs for their own services without the platform team, every change had a limited blast radius, and credentials came out of git. Built inter-stack dependency tracking in-house, similar to what Spacelift offers, so platform-level changes showed exactly which downstream services they would affect.</li>
+									<li>Led the cross-team migration of all product teams onto the new platform within my first six months, upskilling teams to work independently from off-the-shelf templates and working through disagreements over conventions carried over from the previous setup.</li>
 									<li>Built the platform's developer interface (CLI tools, APIs and web apps in TypeScript), making "you build it, you own it" practical for 60 engineers.</li>
 									<li>Architected the new microservice platform for 10–100x the previous load, entirely as infrastructure-as-code in Pulumi (TypeScript).</li>
 								</ul>
@@ -460,7 +468,7 @@ const skillGroups = [
 			page-break-after: avoid;
 		}
 		/* Don't split a bullet, skill group or education entry across pages */
-		li, .print-avoid-break {
+		li, .role > p, .print-avoid-break {
 			break-inside: avoid;
 			page-break-inside: avoid;
 		}
