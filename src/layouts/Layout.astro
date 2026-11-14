@@ -14,7 +14,8 @@ const { title = "Christian Probst", description } = Astro.props;
 	<head>
 		<GoogleAnalytics />
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="theme-color" content="#000000" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
@@ -25,7 +26,10 @@ const { title = "Christian Probst", description } = Astro.props;
 		<meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Sacramento&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+		<!-- Fonts load without blocking first paint; text shows in the system font until Inter arrives. -->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" media="print" onload="this.media='all'">
+		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap"></noscript>
+		<slot name="head" />
 	</head>
 	<body class="min-h-screen">
 		<slot />

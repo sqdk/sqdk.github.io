@@ -1,0 +1,41 @@
+---
+/** Breadcrumb trail shown at the top of inner pages. The last item is the current page. */
+interface Props {
+	trail: { label: string; href?: string }[];
+}
+const { trail } = Astro.props;
+---
+
+<nav class="crumbs no-print" aria-label="Breadcrumb">
+	{
+		trail.map((item, i) => (
+			<>
+				{i > 0 && <span class="sep" aria-hidden="true">/</span>}
+				{item.href ? <a href={item.href}>{item.label}</a> : <span aria-current="page">{item.label}</span>}
+			</>
+		))
+	}
+</nav>
+
+<style>
+	.crumbs {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: 0.8125rem;
+		color: rgb(255 255 255 / 0.45);
+	}
+	.crumbs a {
+		color: rgb(255 255 255 / 0.7);
+		padding: 0.5rem 0;
+		transition: color 0.12s;
+	}
+	.crumbs a:hover {
+		color: var(--accent);
+	}
+	.sep {
+		color: rgb(255 255 255 / 0.25);
+	}
+</style>

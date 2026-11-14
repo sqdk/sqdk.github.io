@@ -1,0 +1,76 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import { experiments } from '../../experiments';
+---
+
+<Layout title="Experiments | Christian Probst" description="Small interactive experiments by Christian Probst.">
+	<main class="max-w-3xl mx-auto px-5 py-8 md:py-14">
+		<Crumbs trail={[{ label: 'sqdk.io', href: '/' }, { label: 'experiments' }]} />
+		<h1 class="text-4xl md:text-5xl font-bold tracking-tight mt-8 mb-10">Experiments</h1>
+		<ol class="list">
+			{
+				experiments.map((e, i) => (
+					<li>
+						<a href={`/experiments/${e.slug}/`}>
+							<span class="num">{String(experiments.length - i).padStart(2, '0')}</span>
+							<span class="body">
+								<span class="title">{e.title}</span>
+								<span class="summary">{e.summary}</span>
+							</span>
+							<span class="arrow" aria-hidden="true">→</span>
+						</a>
+					</li>
+				))
+			}
+		</ol>
+	</main>
+</Layout>
+
+<style>
+	.list {
+		border-top: 1px solid rgb(255 255 255 / 0.12);
+	}
+	.list a {
+		display: flex;
+		align-items: baseline;
+		gap: 1rem;
+		padding: 1.25rem 0;
+		border-bottom: 1px solid rgb(255 255 255 / 0.12);
+	}
+	.num {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: 0.8125rem;
+		color: var(--accent);
+	}
+	.body {
+		flex: 1;
+		min-width: 0;
+	}
+	.title {
+		display: block;
+		font-size: 1.25rem;
+		font-weight: 700;
+		transition: color 0.12s;
+	}
+	.summary {
+		display: block;
+		margin-top: 0.25rem;
+		color: rgb(255 255 255 / 0.55);
+		font-size: 0.9375rem;
+		line-height: 1.5;
+	}
+	.arrow {
+		color: rgb(255 255 255 / 0.35);
+		transition:
+			transform 0.12s,
+			color 0.12s;
+	}
+	.list a:hover .title,
+	.list a:hover .arrow {
+		color: var(--accent);
+	}
+	.list a:hover .arrow {
+		transform: translateX(4px);
+	}
+</style>

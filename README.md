@@ -1,47 +1,32 @@
-# Astro Starter Kit: Basics
+# sqdk.io
 
-```sh
-npm create astro@latest -- --template basics
-```
+Personal site of Christian Probst, built with [Astro](https://astro.build) and Tailwind and deployed to GitHub Pages on every push to `main`.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Pages
 
-## 🚀 Project Structure
+| Path | Source | What it is |
+| :-- | :-- | :-- |
+| `/` | `src/pages/index.astro` | Splash and title page over an animated bead backdrop (`src/home/beads.ts`) |
+| `/resume/` | `src/pages/resume.astro` | Resume (printable) |
+| `/experiments/` | `src/pages/experiments/index.astro` | List of experiments |
+| `/experiments/<slug>/` | `src/pages/experiments/<slug>.astro` | One page per experiment |
 
-Inside of your Astro project, you'll see the following folders and files:
+## Adding an experiment
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+1. Create `src/pages/experiments/<slug>.astro` (put supporting code in `src/experiments/<slug>/`).
+2. Add an entry to the list in `src/experiments/index.ts`. The index page picks it up from there.
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## The home page backdrop
 
-## 🧞 Commands
+`src/home/beads.ts` is a single WebGL fragment shader with no dependencies: a grid of chrome beads carved by a slowly moving gyroid surface. The splash plays on fresh visits and reloads, and is skipped when arriving from another page on the site, with reduced-motion enabled, or without WebGL. If the GPU can't keep up, the page lowers the render resolution instead of dropping frames.
 
-All commands are run from the root of the project, from a terminal:
+In development, `/?at=<ms>` renders a single frame of the splash timeline, which is handy for screenshots.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Commands
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
+| Command | Action |
+| :-- | :-- |
+| `npm install` | Install dependencies |
+| `npm run dev` | Start the dev server at `localhost:4321` |
+| `npm run build` | Build the site to `./dist/` |
+| `npm run preview` | Preview the build locally |
