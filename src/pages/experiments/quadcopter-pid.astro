@@ -1,0 +1,443 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import { LOOPS, PRESETS, TUNED } from '../../experiments/quadcopter/sim';
+
+const TERMS = [
+	{ term: 'kp', label: 'Kp', part: 'p', name: 'proportional' },
+	{ term: 'ki', label: 'Ki', part: 'i', name: 'integral' },
+	{ term: 'kd', label: 'Kd', part: 'd', name: 'derivative' },
+] as const;
+
+const digits = (step: number) => (step >= 1 ? 0 : step >= 0.1 ? 1 : 2);
+---
+
+<Layout
+	title="Stabilizing a quadcopter with PID | Christian Probst"
+	description="An interactive simulation of three cascaded PID loops keeping a quadcopter in the air. Tune the gains, add wind and sensor noise, and watch what each term does."
+>
+	<main class="max-w-6xl mx-auto px-4 sm:px-5 py-8 md:py-14">
+		<Crumbs
+			trail={[
+				{ label: 'sqdk.io', href: '/' },
+				{ label: 'experiments', href: '/experiments/' },
+				{ label: 'quadcopter-pid' },
+			]}
+		/>
+		<h1 class="text-3xl md:text-5xl font-bold tracking-tight mt-8 mb-3">Stabilizing a quadcopter with PID</h1>
+		<p class="lede">
+			Tap anywhere in the sky to move the target. Three PID loops fly the drone there. Change their gains to see
+			what each term is for.
+		</p>
+
+		<div id="quad" class="demo">
+			<div class="stage">
+				<div class="sim-wrap">
+					<canvas
+						id="quad-sim"
+						tabindex="0"
+						aria-label="Quadcopter simulation. Click or tap to move the target. With keyboard focus: arrow keys nudge the target, space sends a gust, R resets."
+					></canvas>
+				</div>
+				<p class="keys">Click to move the target · arrow keys nudge it · space for a gust · R to reset</p>
+
+				<div class="toolbar">
+					<button type="button" class="btn primary" data-action="gust">Gust</button>
+					<button type="button" class="btn" data-action="reset">Reset</button>
+					<button type="button" class="btn" data-action="pause" aria-pressed="false">Pause</button>
+				</div>
+
+				<div class="presets" role="group" aria-label="Presets">
+					{
+						PRESETS.map((p) => (
+							<button type="button" class="pill" data-preset={p.id} aria-pressed={p.id === 'tuned' ? 'true' : 'false'}>
+								{p.label}
+							</button>
+						))
+					}
+				</div>
+
+				<div class="plot-wrap">
+					<canvas id="quad-plot" aria-label="Rolling plots of position, altitude and tilt against their setpoints"></canvas>
+					<p class="legend">
+						<span class="swatch measured"></span>measured
+						<span class="swatch setpoint"></span>setpoint
+						<span class="window">last 8 s</span>
+					</p>
+				</div>
+			</div>
+
+			<aside class="panels" aria-label="Controller gains">
+				{
+					LOOPS.map((loop) => (
+						<section class="panel">
+							<header>
+								<h2>{loop.name}</h2>
+								<span class="flow">{loop.flow}</span>
+							</header>
+							{TERMS.map((t) => (
+								<div class="row">
+									<label for={`quad-${loop.id}-${t.term}`}>{t.label}</label>
+									<input
+										id={`quad-${loop.id}-${t.term}`}
+										type="range"
+										min="0"
+										max={loop.ranges[t.term].max}
+										step={loop.ranges[t.term].step}
+										value={TUNED[loop.id][t.term]}
+										data-loop={loop.id}
+										data-term={t.term}
+										aria-label={`${loop.name} ${t.name} gain`}
+									/>
+									<output for={`quad-${loop.id}-${t.term}`} data-out={`${loop.id}.${t.term}`}>
+										{TUNED[loop.id][t.term].toFixed(digits(loop.ranges[t.term].step))}
+									</output>
+									<span class="bar" aria-hidden="true">
+										<span class="fill" data-bar={`${loop.id}.${t.part}`} />
+									</span>
+								</div>
+							))}
+						</section>
+					))
+				}
+
+				<section class="panel">
+					<header>
+						<h2>Disturbances</h2>
+					</header>
+					<div class="row wide">
+						<label for="quad-wind">Wind</label>
+						<input id="quad-wind" type="range" min="0" max="1" step="0.05" value={TUNED.wind} data-dist="wind" />
+						<output for="quad-wind" data-out="wind">0%</output>
+					</div>
+					<div class="row wide">
+						<label for="quad-noise">Sensor noise</label>
+						<input id="quad-noise" type="range" min="0" max="1" step="0.05" value={TUNED.noise} data-dist="noise" />
+						<output for="quad-noise" data-out="noise">0%</output>
+					</div>
+				</section>
+
+				<p class="note">The small bars show how hard each term is pushing right now.</p>
+			</aside>
+		</div>
+
+		<section class="how">
+			<h2>How it works</h2>
+			<p>
+				A PID controller looks at the error between where something is and where it should be, and pushes back with
+				three terms. <strong>P</strong> pushes in proportion to the error. On its own it overshoots and oscillates,
+				because nothing slows the drone down as it arrives. <strong>D</strong> reacts to how fast things are changing
+				and acts as a brake, which is what stops the wobble. It also amplifies sensor noise, since noise changes fast.
+				<strong>I</strong> adds up error over time, so a steady push like wind, which P alone can only hold at an offset,
+				eventually gets cancelled.
+			</p>
+			<p>
+				The drone cannot move sideways directly; it has to tilt. So the loops are cascaded: the position loop asks for
+				a tilt, and a much faster attitude loop turns that tilt into a thrust difference between the two motors. A
+				separate altitude loop sets the total thrust.
+			</p>
+			<p>This is a simplified 2D model: one tilt axis, two motors, and no battery sag or propeller aerodynamics.</p>
+		</section>
+	</main>
+</Layout>
+
+<script>
+	import '../../experiments/quadcopter/app';
+</script>
+
+<style>
+	.lede {
+		max-width: 42rem;
+		color: rgb(255 255 255 / 0.65);
+		font-size: 1.0625rem;
+		line-height: 1.55;
+	}
+
+	.demo {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 1.25rem;
+		margin-top: 1.5rem;
+		--mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		--line: rgb(255 255 255 / 0.12);
+	}
+	.stage {
+		min-width: 0;
+	}
+
+	.sim-wrap {
+		aspect-ratio: 4 / 3;
+		border: 1px solid var(--line);
+		border-radius: 6px;
+		overflow: hidden;
+		background: #000;
+	}
+	#quad-sim {
+		display: block;
+		width: 100%;
+		height: 100%;
+		touch-action: manipulation;
+		cursor: crosshair;
+		-webkit-tap-highlight-color: transparent;
+		user-select: none;
+		-webkit-user-select: none;
+	}
+	#quad-sim:focus {
+		outline: none;
+	}
+	.sim-wrap:has(#quad-sim:focus-visible) {
+		border-color: var(--accent);
+	}
+
+	.keys {
+		display: none;
+		margin-top: 0.5rem;
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		color: rgb(255 255 255 / 0.4);
+	}
+
+	.toolbar,
+	.presets {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+	}
+	.btn,
+	.pill {
+		min-height: 40px;
+		padding: 0 0.875rem;
+		border: 1px solid rgb(255 255 255 / 0.22);
+		border-radius: 6px;
+		background: transparent;
+		color: rgb(255 255 255 / 0.85);
+		font-size: 0.875rem;
+		line-height: 1;
+		cursor: pointer;
+		touch-action: manipulation;
+		transition:
+			background-color 0.1s,
+			border-color 0.1s,
+			color 0.1s;
+	}
+	.btn {
+		flex: 1 1 0;
+		font-weight: 700;
+	}
+	.btn.primary {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	.btn:active,
+	.pill:active {
+		background: rgb(255 255 255 / 0.12);
+	}
+	.btn[aria-pressed='true'] {
+		background: #fff;
+		border-color: #fff;
+		color: #000;
+	}
+	.pill {
+		border-radius: 999px;
+		font-family: var(--mono);
+		font-size: 0.75rem;
+	}
+	.pill[aria-pressed='true'] {
+		background: var(--accent);
+		border-color: var(--accent);
+		color: #000;
+	}
+	.btn:focus-visible,
+	.pill:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	.plot-wrap {
+		margin-top: 1rem;
+	}
+	#quad-plot {
+		display: block;
+		width: 100%;
+		height: 204px;
+	}
+	.legend {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		margin-top: 0.4rem;
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+		color: rgb(255 255 255 / 0.45);
+	}
+	.swatch {
+		display: inline-block;
+		width: 14px;
+		height: 0;
+		border-top: 2px solid var(--accent);
+	}
+	.swatch.setpoint {
+		margin-left: 0.6rem;
+		border-top: 1px dashed rgb(255 255 255 / 0.6);
+	}
+	.window {
+		margin-left: auto;
+	}
+
+	.panels {
+		display: grid;
+		gap: 0.75rem;
+		min-width: 0;
+		align-content: start;
+	}
+	.panel {
+		border: 1px solid var(--line);
+		border-radius: 6px;
+		padding: 0.625rem 0.75rem 0.375rem;
+	}
+	.panel header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem;
+		margin-bottom: 0.125rem;
+	}
+	.panel h2 {
+		font-size: 0.9375rem;
+		font-weight: 700;
+	}
+	.flow {
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+		color: rgb(255 255 255 / 0.45);
+		white-space: nowrap;
+	}
+	.row {
+		display: grid;
+		grid-template-columns: 1.6rem minmax(0, 1fr) 2.6rem 3.25rem;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.row.wide {
+		grid-template-columns: 6rem minmax(0, 1fr) 2.6rem;
+	}
+	.row label {
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		color: rgb(255 255 255 / 0.6);
+	}
+	.row.wide label {
+		font-family: inherit;
+		font-size: 0.8125rem;
+	}
+	.row input[type='range'] {
+		width: 100%;
+		height: 40px;
+		margin: 0;
+		accent-color: var(--accent);
+		cursor: pointer;
+		touch-action: pan-y;
+	}
+	.row output {
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		color: rgb(255 255 255 / 0.85);
+	}
+	.bar {
+		position: relative;
+		height: 8px;
+		border-radius: 2px;
+		background: rgb(255 255 255 / 0.07);
+		overflow: hidden;
+	}
+	.bar::after {
+		content: '';
+		position: absolute;
+		left: 50%;
+		top: 0;
+		bottom: 0;
+		width: 1px;
+		background: rgb(255 255 255 / 0.4);
+	}
+	.fill {
+		position: absolute;
+		left: 50%;
+		top: 0;
+		bottom: 0;
+		width: 50%;
+		background: var(--accent);
+		transform: scaleX(0);
+		transform-origin: left center;
+		will-change: transform;
+	}
+	.note {
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+		line-height: 1.5;
+		color: rgb(255 255 255 / 0.4);
+	}
+
+	.how {
+		max-width: 42rem;
+		margin-top: 3rem;
+		color: rgb(255 255 255 / 0.72);
+		line-height: 1.65;
+	}
+	.how h2 {
+		margin-bottom: 0.75rem;
+		font-size: 1.375rem;
+		font-weight: 700;
+		color: #fff;
+	}
+	.how p + p {
+		margin-top: 0.875rem;
+	}
+	.how strong {
+		color: var(--accent);
+	}
+
+	@media (min-width: 640px) {
+		.sim-wrap {
+			aspect-ratio: 16 / 10;
+		}
+		.btn {
+			flex: 0 0 auto;
+			min-width: 5.5rem;
+		}
+		#quad-plot {
+			height: 234px;
+		}
+	}
+	@media (min-width: 1024px) {
+		.demo {
+			grid-template-columns: minmax(0, 1fr) 340px;
+			gap: 1.5rem;
+			align-items: start;
+		}
+		.sim-wrap {
+			max-height: 60vh;
+		}
+	}
+	@media (hover: hover) and (pointer: fine) and (min-width: 640px) {
+		.keys {
+			display: block;
+		}
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.btn:hover,
+		.pill:hover {
+			border-color: #fff;
+		}
+		.btn.primary:hover {
+			background: var(--accent);
+			border-color: var(--accent);
+			color: #000;
+		}
+		.pill[aria-pressed='true']:hover {
+			border-color: var(--accent);
+		}
+	}
+</style>
